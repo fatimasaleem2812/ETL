@@ -1,0 +1,66 @@
+import pandas as pd
+from sqlalchemy import create_engine
+import psycopg2  # or use mysql-connector for MySQL
+
+# Database connection details
+DB_HOST = 'localhost'
+DB_PORT = '5432'  # Adjust for your DB
+DB_NAME = 'your_database'
+DB_USER = 'your_user'
+DB_PASS = 'your_password'
+
+# Create a database connection string
+conn_str = f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
+# Connect to the database using SQLAlchemy engine
+engine = create_engine(conn_str)
+
+def extract_data():
+    """
+    Extract data from source (e.g., a file or API).
+    Here we simulate extracting from a CSV file.
+    """
+    # Assuming you're extracting data from a CSV file
+    df = pd.read_csv('source_data.csv')
+    return df
+
+def transform_data(df):
+    """
+    Transform the extracted data.
+    This could involve cleaning or modifying the data as needed.
+    """
+    # Example transformation: Convert column values to uppercase
+    df['column_name'] = df['column_name'].str.upper()
+    
+    # Example: You can also filter out unwanted rows
+    df = df[df['column_name'] != 'unwanted_value']
+    
+    return df
+
+def update_data(df):
+    """
+    Load data into the target database (e.g., updating existing records).
+    This assumes you want to update existing records based on a primary key.
+    """
+    for index, row in df.iterrows():
+        update_query = """
+        UPDATE target_table
+        SET column1 = %s, column2 = %s
+        WHERE primary_key_column = %s;
+        """
+        # Executing update query for each row in the DataFrame
+        with engine.connect() as connection:
+            connection.execute(update_query, (row['column1'], row['column2'], row['primary_key_column']))
+
+def main():
+    # Step 1: Extract data
+    df = extract_data()
+    
+    # Step 2: Transform data
+    transformed_df = transform_data(df)
+    
+    # Step 3: Update data in target database
+    update_data(transformed_df)
+
+if __name__ == '__main__':
+    main()
