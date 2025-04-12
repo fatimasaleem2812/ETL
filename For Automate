@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+import time  # For controlling the delay (sleep)
 import psycopg2  # or use mysql-connector for MySQL
 
 # Database connection details
@@ -53,14 +54,24 @@ def update_data(df):
             connection.execute(update_query, (row['column1'], row['column2'], row['primary_key_column']))
 
 def main():
-    # Step 1: Extract data
-    df = extract_data()
-    
-    # Step 2: Transform data
-    transformed_df = transform_data(df)
-    
-    # Step 3: Update data in target database
-    update_data(transformed_df)
+    while True:  # Loop to keep the script running indefinitely
+        print("Starting the update process...")
+        
+        # Step 1: Extract data
+        df = extract_data()
+        
+        # Step 2: Transform data
+        transformed_df = transform_data(df)
+        
+        # Step 3: Update data in target database
+        update_data(transformed_df)
+        
+        # Print a message indicating the update was completed
+        print("Update process completed.")
+        
+        # Wait for 60 minutes (3600 seconds) before running again
+        print("Waiting for 60 minutes before the next update...")
+        time.sleep(3600)  # Sleep for 60 minutes (3600 seconds)
 
 if __name__ == '__main__':
     main()
